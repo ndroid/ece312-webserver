@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Upload page for TCP Wireshark Lab</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; }
+    label { display:block; margin-top: 0.75rem; }
+    input[type=text], textarea { width:100%; padding:0.5rem; }
+    button { margin-top: 0.75rem; }
+    pre { background:#f6f8fa; padding:1rem; }
+  </style>
+</head>
+<body>
+  <h2>Upload page for TCP Wireshark Lab</h2>
+    <p><font face="Arial, Helvetica, sans-serif" > Adapted from lab exercise in: <br>
+        Computer Networking: A Top Down Approach, 6th edition<br>
+        Copyright 2012 J.F. Kurose and K.W. Ross, All Rights Reserved </font></p>  
+    <p><font face="Arial, Helvetica, sans-serif">If you have followed the instructions for the TCP Wireshark
+    Lab, you have <i>already</i> downloaded an ASCII copy of Alice and Wonderland from 
+    <a href="http://gaia.cs.umass.edu/wireshark-labs/alice.txt">http://gaia.cs.umass.edu/wireshark-labs/alice.txt</a> 
+    and you also <i>already</i> have the Wireshark packet sniffer running and capturing 
+    packets on your computer.<br> </font>
+    </p>        
+    <p><font face="Arial, Helvetica, sans-serif">Click on the Choose File button below to select the directory/file 
+        name for the copy of alice.txt that is stored on your computer. </font>
+    </p>
+  <form id="postForm">
+    <label>Select a local file to upload (.md, .txt, .json)
+      <input type="file" id="fileInput" accept=".md,.txt,.json" required />
+    </label>
+
+    <p><font face="Arial, Helvetica, sans-serif">Once you have selected the file, 
+    click on the "Send file" button below. This will cause 
+    your browser to send a copy of alice.txt over an HTTP connection (using TCP) 
+    to the web server. After clicking on the button, wait 
+    until a short message is displayed indicating the the upload is complete. 
+    Then stop your Wireshark packet sniffer - you're ready to begin analyzing the 
+    TCP transfer of alice.txt from your computer to the server!!</font> 
+    </p>
+    <button type="submit">Send file</button>
+  </form>
+
+  <h2>Response</h2>
+  <pre id="response">(none)</pre>
+
+  <script>
+    const form = document.getElementById('postForm');
+    const resp = document.getElementById('response');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      resp.textContent = 'Sending...';
+        // Only file uploads are supported. Ensure a file is selected.
+        const fileEl = document.getElementById('fileInput');
+        if (!fileEl.files || !fileEl.files[0]) {
+          resp.textContent = 'No file selected';
+          return;
+        }
+        const f = fileEl.files[0];
+        const filename = f.name;
+        const method = 'POST';
+
+      // Helper: choose Content-Type based on extension
+      function contentTypeFor(name) {
+        if (!name) return 'text/markdown';
+        const idx = name.lastIndexOf('.');
+        if (idx === -1) return 'text/markdown';
+        const ext = name.slice(idx + 1).toLowerCase();
+        switch (ext) {
+          case 'md': return 'text/markdown';
+          case 'markdown': return 'text/markdown';
+          case 'txt': return 'text/plain';
+          case 'json': return 'application/json';
+          default: return 'text/markdown';
+        }
+      }
+
+      // Decide content-type: prefer selected file's MIME, else infer from filename
+      let contentType = 'text/markdown';
+      if (f.type) contentType = f.type;
+      else contentType = (function(name) {
+        if (!name) return 'text/markdown';
+        const idx = name.lastIndexOf('.');
+        if (idx === -1) return 'text/markdown';
+        const ext = name.slice(idx + 1).toLowerCase();
+        switch (ext) {
+          case 'md': return 'text/markdown';
+          case 'markdown': return 'text/markdown';
+          case 'txt': return 'text/plain';
+          case 'json': return 'application/json';
+          default: return 'text/markdown';
+        }
+      })(f.name || filename);
+
+      try {
+        // Read file as text and send as POST body
+        const fileText = await (new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsText(f);
+        }));
+
+        const r = await fetch('/' + encodeURIComponent(filename), {
+          method,
+          headers: {
+            'Content-Type': contentType
+          },
+          body: fileText
+        });
+        const text = await r.text();
+        resp.textContent = `HTTP ${r.status}\n` + text;
+      } catch (err) {
+        resp.textContent = 'Error: ' + String(err);
+      }
+    });
+  </script>
+  <script>
+    // No textarea: keep a small UX improvement so selecting a file shows its name in the response area
+    const fileInput = document.getElementById('fileInput');
+    fileInput.addEventListener('change', (e) => {
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      document.getElementById('response').textContent = `Selected: ${f.name} (${f.size} bytes)`;
+    });
+  </script>
+</body>
+</html>

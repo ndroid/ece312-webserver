@@ -1,0 +1,12 @@
+{
+  "name": "ece312-webserver",
+  "version": "1.0.0",
+  "description": "Simple content server for ECE312 course: serves resources/ and writes posts/ via POST/PUT",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}

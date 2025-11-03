@@ -1,0 +1,27 @@
+[Unit]
+Description=ECE312 simple Node.js webserver
+After=network.target
+
+[Service]
+# Replace USER and GROUP with the user you want the service to run as.
+User=www-data
+Group=www-data
+
+# Set WorkingDirectory to the repo location containing server.js
+WorkingDirectory=/path/to/ece312/webserver
+
+# Use env to find node on PATH; adjust ExecStart if you run with nvm or a different node
+ExecStart=/usr/bin/env node server.js
+Restart=always
+RestartSec=5
+
+# Optional: override PORT via Environment or systemd drop-in
+Environment=PORT=8080
+
+[Install]
+WantedBy=multi-user.target
+
+# Notes:
+# - Edit WorkingDirectory and User before enabling. Example locations:
+#   WorkingDirectory=/home/youruser/ece312/webserver
+# - To bind to low ports (80) without running as root, use a reverse proxy or port forwarding.
