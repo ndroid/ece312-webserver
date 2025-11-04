@@ -24,7 +24,8 @@ Alternative: configure nginx as a reverse proxy for better production behavior.
 Nginx reverse-proxy example
 ---------------------------
 
-An example nginx server block is included at `deploy/nginx/ece312.conf`. Example steps to enable it on Debian/Ubuntu:
+An example nginx server block is included at `deploy/nginx/ece312.conf`. The server_name must be updated in the conf file prior to deployment. 
+Example steps to enable it on Debian/Ubuntu:
 
 ```bash
 sudo cp deploy/nginx/ece312.conf /etc/nginx/sites-available/ece312.conf

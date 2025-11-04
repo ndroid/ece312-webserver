@@ -1,6 +1,6 @@
 # ECE312 Simple Webserver
 
-This repository holds course posts and resources. A minimal Node.js server is included to serve files from `resources/` and to accept `POST`/`PUT` requests which write into `posts/`.
+This repository holds course posts and resources. A minimal Node.js server is included to serve files from `resources/` and to accept `POST`/`PUT` requests which write into `posts/`. Note that the server must have write permissions to the `posts/` directory, so if you are using user www-data for the server you will need to give that user/group write permissions to the posts directory.
 
 Start the server:
 
